@@ -16,7 +16,7 @@ WebApp.Loader = function (config) {
 	
 	this.messages = config.messages || {loading: 'Loading…', rendering: 'Rendering…'};
 	
-	this.assets = config.assets || [];
+	this.assets = config.assets || config.resources || [];
 	
 	this.tasks = {};
 	
@@ -46,6 +46,24 @@ WebApp.Loader = function (config) {
 		this.load ();
 	}
 	
+	this.enqueueResources = function (resources) {
+
+		for (var url in resources) {
+			this.tasks[url] = new WebApp.Loader.Task (url, resources[url]);
+			this.tasksToComplete ++;
+		}
+
+		if (this.isLoading)
+			this.loadMore = true;
+		else
+			this.load ();
+		
+		if (!this.quiet) {
+			this.progress.update (this.tasksCompleted / this.tasksToComplete);
+		}
+
+	}
+
 	this.load = function () {
 		
 		if (this.tasksToComplete == this.tasksCompleted || this.isLoading)

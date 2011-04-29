@@ -1,4 +1,4 @@
-var SocialButtons = function(data){
+WebApp.Social = function(data){
 
 
 	console.log('data', data, data.container);
@@ -14,17 +14,13 @@ var SocialButtons = function(data){
 	this.VKapiId = data.VKapiId || undefined;
 	this.FBappId = data.FBappId || undefined;	
 	this.colorscheme = data.colorscheme || undefined;
-
-	this.load();
-	
-	
 }
 
 
 
 
 
-SocialButtons.prototype.load = function(){
+WebApp.Social.prototype.render = function(){
     console.log('load');
     this.twitter();
 	this.myworld();
@@ -34,40 +30,24 @@ SocialButtons.prototype.load = function(){
 }
 
 
-
-
-SocialButtons.prototype.loadScript = function(url){
-	var script = document.createElement('script');
-	script.setAttribute('type', 'text/javascript');
-	script.setAttribute('src', url);
-	this.head.appendChild(script);
+WebApp.Social.prototype.loadResources = function (callback) {
+	var fbAPI = document.location.protocol + '//connect.facebook.net/ru_RU/all.js';
+	var resources = {
+		'http://platform.twitter.com/widgets.js': null,
+		'http://userapi.com/js/api/openapi.js?17' : {require: null, type: 'js'},
+		'http://stg.odnoklassniki.ru/share/odkl_share.js?3' : {require: null, type: 'js'},
+		'http://stg.odnoklassniki.ru/share/odkl_share.css?3' : {require: null, type: 'css'}
+	};
+	resources[fbAPI] = null;
+	WebApp.Loader.instance.enqueueResources (resources);
 }
 
 
-
-
-SocialButtons.prototype.loadCss = function(url){
-	var css = document.createElement('link');
-	css.setAttribute('type', 'text/css');
-	css.setAttribute('rel', 'stylesheet');
-	css.setAttribute('href', url);
-	this.head.appendChild(css);
-}
-
-
-
-
-
-SocialButtons.prototype.twitter = function(){
+WebApp.Social.prototype.twitter = function(){
 
 
     console.log('twitter');
 
-
-	// Create script tag
-	this.loadScript('http://platform.twitter.com/widgets.js');
-
-		
 	// Create tweeter button
 	var buttonLink = 'http://twitter.com/share?count=horizontal&lang=en&text=&url=&via=';
 	var button = document.createElement('a');
@@ -90,7 +70,7 @@ SocialButtons.prototype.twitter = function(){
 
 
 
-SocialButtons.prototype.myworld = function(){
+WebApp.Social.prototype.myworld = function(){
 	
 	console.log('myworld');
 	
@@ -127,11 +107,7 @@ SocialButtons.prototype.myworld = function(){
 
 
 
-SocialButtons.prototype.vkontakte = function(){
-
-
-	// Create script tag
-	this.loadScript('http://userapi.com/js/api/openapi.js?17');
+WebApp.Social.prototype.vkontakte = function(){
 
 
 	// Init Vkontakte application
@@ -176,16 +152,7 @@ SocialButtons.prototype.vkontakte = function(){
 
 
 
-SocialButtons.prototype.odnoklasniki = function(){
-	
-	
-	// Load script
-	this.loadScript('http://stg.odnoklassniki.ru/share/odkl_share.js?3');
-
-
-	// Load css
-	this.loadCss('http://stg.odnoklassniki.ru/share/odkl_share.css?3');
-	
+WebApp.Social.prototype.odnoklasniki = function(){
 	
 	// Odnoklasniki init
 	/*
@@ -226,7 +193,7 @@ SocialButtons.prototype.odnoklasniki = function(){
 
 
 
-SocialButtons.prototype.facebook = function(){
+WebApp.Social.prototype.facebook = function(){
 	
 	
 	var fbWidth = '660';
@@ -289,13 +256,4 @@ SocialButtons.prototype.facebook = function(){
 			xfbml  : true  // parse XFBML
 		});
 	};
-
-
-	(function() {
-		var e = document.createElement('script');
-		e.src = document.location.protocol + '//connect.facebook.net/ru_RU/all.js';
-		e.async = true;
-		document.getElementById('fb-root').appendChild(e);
-	}());	
-	
 }
