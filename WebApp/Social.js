@@ -31,7 +31,8 @@ WebApp.Social.prototype.render = function(){
 
 
 WebApp.Social.prototype.loadResources = function (callback) {
-	var fbAPI = document.location.protocol + '//connect.facebook.net/ru_RU/all.js';
+	var proto = document.location.protocol;
+	var fbAPI = (proto.match (/^http/) ? proto : 'http:') + '//connect.facebook.net/ru_RU/all.js';
 	var resources = {
 		'http://platform.twitter.com/widgets.js': null,
 		'http://userapi.com/js/api/openapi.js?17' : {require: null, type: 'js'},
