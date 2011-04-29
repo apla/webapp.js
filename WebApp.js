@@ -36,6 +36,7 @@ WebApp.Loader = function (config) {
 	
 	this.isLoading = false;
 	this.loadMore  = false;
+	this.isDone    = false;
 	
 	this.begin = function () {
 		this.progress = new WebApp.Loader.Progress (this.messages);
@@ -112,7 +113,8 @@ WebApp.Loader = function (config) {
 			this.progress.update (this.tasksCompleted / this.tasksToComplete);
 		}
 		
-		if (this.tasksCompleted == this.tasksToComplete) {
+		if (this.tasksCompleted == this.tasksToComplete && !this.isDone) {
+			this.isDone = true;
 			this.readyCallback (this);
 		}
 	}
@@ -268,22 +270,29 @@ WebApp.Loader.Task = function (url) {
 		var node = document.createElement(this.nodeName);
 		
 		//console.log (nodeName);
-		if (this.nodeName == 'script') {
-			if (node.addEventListener) {
-				node.addEventListener("load", function () {
+		// we add events for any browser who supports events
+		if (node.addEventListener) {
+			node.addEventListener("load", function () {
+				self.completed ();
+			}, false);
+		} else {
+			node.onreadystatechange = function() {
+				if (this.readyState == "complete" || this.readyState == "loaded")
 					self.completed ();
-				}, false);
-			} else {
-				node.onreadystatechange = function() {
-					if (this.readyState == "complete" || this.readyState == "loaded")
-						self.completed ();
-				}
 			}
-		} else if (this.nodeName == 'link') {
-			// console.log ('node before timer ', node);
+		}
+		// but event doesn't call in gecko, webkit
+		if (this.nodeName == 'link') {
+			
+			//console.log ('node before timer ', node, node.sheet);
 			var _timer = setInterval(function () {
 				try {
-					// console.log ('node within timer ', node, node.sheet, node.styleSheet);
+					//var t;
+					//for (var k in node.sheet) {
+					//	t += k + ' => ' + node.sheet[k] + ', '
+					//}
+
+					// console.log ('node within timer ', node, node.sheet);
 					var cssLoaded = 0;
 					if (node.sheet && node.sheet.cssRules.length > 0 )
 						cssLoaded = 1;
@@ -292,14 +301,18 @@ WebApp.Loader.Task = function (url) {
 					else if (node.innerHTML && node.innerHTML.length > 0 )
 						cssLoaded = 1;
 				} catch (ex) {
-					//console.log (ex)
+					// we hope firefox return exception because css located on another domain
+					// TODO: check for domain
+					if (ex.name == 'NS_ERROR_DOM_SECURITY_ERR')
+						cssLoaded = 1;
+					// console.log (ex)
 				}
 				if (cssLoaded) {
 					// console.log ('css loaded');
 					clearInterval(_timer);
 					self.completed ();
 				}
-			}, 500)
+			}, 50)
 		}
 		
 		for (var k in this.nodeAttrs) {
