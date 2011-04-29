@@ -147,10 +147,10 @@ WebApp.Loader = function (config) {
 		var i = events.length;
 
 		while (i--) {
-			cache.addEventListener(events[i], updateCacheStatus);
+			cache.addEventListener(events[i], updateCacheStatus, false);
 		}
 		
-		cache.addEventListener('error', updateCacheError);
+		cache.addEventListener('error', updateCacheError, false);
 	}
 	
 	//flag to indicate whether target function has already been run
