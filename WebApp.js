@@ -103,7 +103,7 @@ WebApp.Loader = function (config) {
 		delete this.tasks[task.url];
 		
 		this.tasksCompleted ++;
-		console.log (task.url, '' + this.tasksCompleted / this.tasksToComplete * 100 + '% done');
+		console.log (task.url, '' + ~~ (this.tasksCompleted / this.tasksToComplete * 100) + '% done');
 		if (this.isLoading)
 			this.loadMore = true;
 		else
@@ -380,7 +380,7 @@ WebApp.Loader.Progress = function (messages) {
 	}
 	
 	this.update = function (progress) {
-		this.progressBarNode.style.width = progress * 100 + '%';
+		this.progressBarNode.style.width = ~~ (progress * 100) + '%';
 		
 		if (progress == 1) {
 			this.containerNode.firstChild.textContent = this.messages.rendering;
