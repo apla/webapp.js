@@ -345,7 +345,7 @@ WebApp.Loader.Progress = function (messages) {
 		//if (resources[type+'-'+version])
 		var node = document.createElement ('div');
 		node.setAttribute ('id', 'web-app-progress');
-		node.setAttribute ('style', 'font-family: "Helvetica Neue",HelveticaNeue,"Helvetica-Neue",Helvetica,"BBAlpha Sans",sans-serif; -webkit-transition: opacity linear 2s; text-align: center; padding: 10px; border-radius: 10px; background: rgba(192, 192, 192, 0.3); height: 50px; width: 300px; text-align: left; position: absolute !important; z-index: 100; top: '+(Math.floor(window.innerHeight/2))+'px; left: 50%; margin: -25px 0 0 -150px; display: "block";');
+		node.setAttribute ('style', 'font-family: "Helvetica Neue",HelveticaNeue,"Helvetica-Neue",Helvetica,sans-serif; -webkit-transition: opacity linear 2s; -moz-transition: opacity linear 2s; text-align: center; padding: 10px; border-radius: 10px; background: rgba(192, 192, 192, 0.3); height: 50px; width: 300px; text-align: left; position: absolute !important; z-index: 100; top: '+(Math.floor(window.innerHeight/2))+'px; left: 50%; margin: -25px 0 0 -150px; display: block;');
 		body.insertBefore(node, body.firstChild);
 
 		var nodeText = document.createTextNode (this.messages.loading);
@@ -357,7 +357,7 @@ WebApp.Loader.Progress = function (messages) {
 		
 		var nodeProgress = document.createElement ('div');
 		nodeProgress.setAttribute ('class', '');
-		nodeProgress.setAttribute ('style', 'background-image: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0%, #7fb6e7), color-stop(2%, #2986d6), color-stop(100%, #1d5e96)); -webkit-transition: width linear 0.3s; height: 8px; border-radius: 5px; width: 0; display: "block";');
+		nodeProgress.setAttribute ('style', 'background: -moz-linear-gradient(top,  #2986d6,  #1d5e96); background: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0%, #7fb6e7), color-stop(2%, #2986d6), color-stop(100%, #1d5e96)); -moz-transition: width linear 0.3s; -webkit-transition: width linear 0.3s; height: 8px; border-radius: 5px; width: 0; display: block;');
 		node.appendChild (nodeProgress);
 		
 		node.style.display = 'none';
