@@ -1,0 +1,5 @@
+try to use new css loading code (referenced at WebApp.js)
+check for navigator onLine, but not depend on true value (mobile networks, desktop safari)
+check for loading timeout (display timeout message for user)
+check for resource loading error (fuck mozilla)
+
