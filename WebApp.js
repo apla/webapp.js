@@ -37,7 +37,12 @@ WebApp.Loader = function (config) {
 	this.isLoading = false;
 	this.loadMore  = false;
 	this.isDone    = false;
-	
+	// if (window.addEventListener) 
+	//window.addEventListener ("error", function (eee) {
+		//console.error (eee);
+		// self.completed ();
+	// }, false);
+
 	this.begin = function () {
 		this.progress = new WebApp.Loader.Progress (this.messages);
 		
@@ -275,6 +280,10 @@ WebApp.Loader.Task = function (url) {
 			node.addEventListener("load", function () {
 				self.completed ();
 			}, false);
+			node.addEventListener("error", function (event) {
+				console.log (event);
+			}, false);
+
 		} else {
 			node.onreadystatechange = function() {
 				if (this.readyState == "complete" || this.readyState == "loaded")
@@ -284,6 +293,26 @@ WebApp.Loader.Task = function (url) {
 		// but event doesn't call in gecko, webkit
 		if (this.nodeName == 'link') {
 			
+			// TODO: use solution from http://www.backalleycoder.com/2011/03/20/link-tag-css-stylesheet-load-event/:
+			var loadCSS = function(url, callback){
+				var link = document.createElement('link');
+				link.type = 'text/css';
+				link.rel = 'stylesheet';
+				link.href = url;
+
+				document.getElementsByTagName('head')[0].appendChild(link);
+
+				var html = document.getElementsByTagName('html')[0];
+				var img = document.createElement('img');
+				img.onerror = function(){
+					if(callback) callback(link);
+					html.removeChild(img);
+				}
+
+				html.appendChild(img);
+				img.src = url;
+			}
+
 			//console.log ('node before timer ', node, node.sheet);
 			var _timer = setInterval(function () {
 				try {
@@ -307,7 +336,7 @@ WebApp.Loader.Task = function (url) {
 						cssLoaded = 1;
 					// console.log (ex)
 				}
-				if (cssLoaded) {
+				if (cssLoaded || self.isCompleted ()) {
 					// console.log ('css loaded');
 					clearInterval(_timer);
 					self.completed ();
