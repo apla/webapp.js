@@ -8,12 +8,10 @@
         <div id="counters"></div>
         <script type="text/javascript">
 			web_app = new WebApp.Loader ({
-				resources: {
-					'WebApp/Social.js' : null,
-					'xxx.js' : null,
-					'yyy.js' : null
+				res: {
+					'WebApp/Social.js' : null
 				},
-				readyCallback: function (loader) {
+				cb: function (loader) {
 
 					var buttons = new WebApp.Social ({
 						'container':'counters',
@@ -27,7 +25,7 @@
 					});
 
 					buttons.loadResources (function () {
-						buttons.render ();
+						buttons.render (loader);
 					});
 				}
 			});
