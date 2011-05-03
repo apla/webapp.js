@@ -19,21 +19,42 @@ WebApp.Loader = function (config) {
 	this.assets = config.assets || config.resources || [];
 	
 	this.tasks = {};
+	this.res = config.res || [];
 	
-	for (var assetUrl in this.assets) {
-		this.tasks[assetUrl] = new WebApp.Loader.Task (assetUrl, this.assets[assetUrl]);
+	this.tasks = new function () {
+//		var t = {};
+//		this.items = t;
+		this.completion = function () {
+			var d = 0, a = 0;
+			for (var k in this) {
+				if (! this.byUrl (k))
+					continue;
+//				console.log (k, this[k].state);
+				a ++;
+				if (this[k].state == 4) d ++;
+			}
+			
+//			console.log (d, a);
+			
+			return d / a;
+		};
+		this.byUrl = function (url) {
+			return (this[url] == this.add || this[url] == this.byUrl || this[url] == this.completion ? null : this[url]);
+		};
+		this.add = function (url, conf) {
+			this[url] = new WebApp.Loader.Task (url, conf);
+		}
+
+	};
+	
+	for (var resUrl in this.res) {
+		this.tasks.add (resUrl, this.res[resUrl]);
 	}
-	
-	this.readyCallback = config.readyCallback;
+
+	this.cb = config.cb;
 	
 	this.slotCount = null;
-	this.tasksToComplete = 0;
-	this.tasksCompleted = 0;
 
-	for (var k in this.tasks) if (this.tasks.hasOwnProperty(k)) {
-		this.tasksToComplete ++;
-	}
-	
 	this.isLoading = false;
 	this.loadMore  = false;
 	this.isDone    = false;
@@ -52,11 +73,10 @@ WebApp.Loader = function (config) {
 		this.load ();
 	}
 	
-	this.enqueueResources = function (resources) {
+	this.enqueueResources = function (res) {
 
-		for (var url in resources) {
-			this.tasks[url] = new WebApp.Loader.Task (url, resources[url]);
-			this.tasksToComplete ++;
+		for (var url in res) {
+			this.tasks.add (url, res[url]);
 		}
 
 		if (this.isLoading)
@@ -65,36 +85,45 @@ WebApp.Loader = function (config) {
 			this.load ();
 		
 		if (!this.quiet) {
-			this.progress.update (this.tasksCompleted / this.tasksToComplete);
+			this.progress.update (this.tasks.completion ());
 		}
 
 	}
 
 	this.load = function () {
 		
-		if (this.tasksToComplete == this.tasksCompleted || this.isLoading)
+		if (this.tasks.completion () == 1 || this.isLoading)
 			return;
 		
 		this.isLoading = true;
 		
 		var canContinue = 0;
-		var requirements = {};
+		var require = {};
 		
 		for (var taskUrl in this.tasks) {
-			var task = this.tasks[taskUrl];
+			
+			var task = this.tasks.byUrl (taskUrl);
+			
+			if (!task) continue;
+			
+//			console.log (task, this.tasks, taskUrl);
+			
 			task.checkState();
+			
+//			console.log (task.state);
+			
 			if (task.isReady()) {
 				canContinue ++;
 				task.run ();
 			} else if (task.isRunning()) {
 				canContinue ++;
 			} else {
-				requirements[task.url] = task.require;
+				require[task.url] = task.require;
 			}
 		}
 		
 		if (!canContinue)
-			console.error ("there is no way to resolve dependencies", requirements);
+			console.error ("there is no way to resolve dependencies", require);
 		
 		this.isLoading = false;
 		
@@ -105,22 +134,21 @@ WebApp.Loader = function (config) {
 	}
 	
 	this.taskDone = function (task) {
-		delete this.tasks[task.url];
+		// delete this.tasks[task.url];
 		
-		this.tasksCompleted ++;
-		console.log (task.url, '' + ~~ (this.tasksCompleted / this.tasksToComplete * 100) + '% done');
+		console.log (task.url, '' + ~~ (this.tasks.completion () * 100) + '% done');
 		if (this.isLoading)
 			this.loadMore = true;
 		else
 			this.load ();
 		
 		if (!this.quiet) {
-			this.progress.update (this.tasksCompleted / this.tasksToComplete);
+			this.progress.update (this.tasks.completion ());
 		}
 		
-		if (this.tasksCompleted == this.tasksToComplete && !this.isDone) {
+		if (this.tasks.completion () == 1 && !this.isDone) {
 			this.isDone = true;
-			this.readyCallback (this);
+			this.cb (this);
 		}
 	}
 	
