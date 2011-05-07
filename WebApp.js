@@ -254,13 +254,15 @@ WebApp.Loader.Task = function (url) {
 
 	// parameters parse:
 	if ($a.length == 2 && $a[1] instanceof Object) {
-		this.require   = $a[1].require;
-		this.type      = $a[1].type;
-		this.forRender = $a[1].forRender;
+		this.require     = $a[1].require;
+		this.type        = $a[1].type;
+		this.mustProduce = $a[1].mustProduce;
+		this.cb          = $a[1].cb;
+		this.cbScope     = $a[1].cbScope;
+		
 	} else {
 		this.require   = $a[1];
 		this.type      = $a[2];
-		this.forRender = $a[3];
 	}
 	
 	if (!this.type)
@@ -299,7 +301,9 @@ WebApp.Loader.Task = function (url) {
 	
 	this.checkState = function () {
 		
-		if (!this.require && this.state == 0) {
+		var require = this.require;
+		
+		if (!require && this.state == 0) {
 			this.state = 1;
 		}
 		
@@ -307,7 +311,7 @@ WebApp.Loader.Task = function (url) {
 			return this.state;
 		
 		var satisfy = 0;
-		try {satisfy = eval ("if ("+ (this.require instanceof Array ? this.require.join (' && ') : this.require)+") 1") } catch (e) {};
+		try {satisfy = eval ("if ("+ (require instanceof Array ? require.join (' && ') : require)+") 1") } catch (e) {};
 		if (satisfy) {
 			this.state = 1;
 			return this.state;
@@ -322,6 +326,27 @@ WebApp.Loader.Task = function (url) {
 	
 	this.completed = function () {
 		this.state = 4;
+		
+		var mustProduce = this.mustProduce;
+		
+		if (mustProduce) {
+			var checkString = (mustProduce instanceof Array ? mustProduce.join (' && ') : mustProduce);
+			var satisfy = 0;
+			try {satisfy = eval ("if ("+ checkString +") 1") } catch (e) {};
+			if (!satisfy) {
+				// TODO: WebApp.Loader.instance.taskError (this);
+				console.error ("task " + this.url + " must produce " + checkString + " but it doesn't");
+				// TODO: return;
+			}
+		}
+		
+		// coroutine call
+		if (this.cb) {
+//			console.log ('cb defined', this.cb, this.cbScope);
+			
+			this.cb.call (this.cbScope || this, this);
+		}
+		
 		WebApp.Loader.instance.taskDone (this);
 	}
 	
