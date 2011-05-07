@@ -13,20 +13,22 @@
 				},
 				cb: function (loader) {
 
-					var buttons = new WebApp.Social ({
-						'container':'counters',
+					var social = new WebApp.Social ({
+						vkontakte: {VKapiId: '1990932'},
+						twitter:   {},
+						facebook:  {FBappId: '100576229991604'}
+					}, loader);
+
+					social.render ({
+						to: '#counters',
 						'sitename' : 'Those website with social buttons',
 						'title' : 'Bunch of social buttons', 
 						'description' : 'Those webpage with a bunch social buttons, which you search so long', 
 						'via' : 'mysite.com',
-						'VKapiId' : '1990932',
-						'FBappId' : '100576229991604',
 						'colorscheme': 'dark'
-					});
 
-					buttons.loadResources (function () {
-						buttons.render (loader);
 					});
+					
 				}
 			});
         </script>
