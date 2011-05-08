@@ -30,6 +30,17 @@ function MakeEl (name, attributes) {
 	return el;
 }
 
+// querySelector for ie{6,7} from http://ajaxian.com/archives/creating-a-queryselector-for-ie-that-runs-at-native-speed is bad
+// another version from http://weblogs.asp.net/bleroy/archive/2009/08/31/queryselectorall-on-old-ie-versions-something-that-doesn-t-work.aspx
+
+/*@cc_on if (!document.querySelector)
+(function(){var d=document;var a=d.styleSheets[0]||
+d.createStyleSheet();document.querySelector=function(e){
+a.addRule(e,"f:b");var l=d.all,c=[];
+for(var b=0,f=l.length;b<f;b++)if(l[b].currentStyle.f)
+c[c.length]=l[b];a.removeRule(0);return c}}
+@*/
+
 WebApp = {};
 
 WebApp.Loader = function (config) {
