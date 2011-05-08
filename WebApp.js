@@ -265,7 +265,7 @@ WebApp.Loader.Task = function (url) {
 
 	// parameters parse:
 	if ($a.length == 2 && $a[1] instanceof Object) {
-		this.require     = $a[1].require;
+		this.require     = $a[1].require || null;
 		this.type        = $a[1].type;
 		this.mustProduce = $a[1].mustProduce;
 		this.cb          = $a[1].cb;
@@ -277,7 +277,7 @@ WebApp.Loader.Task = function (url) {
 	}
 	
 	if (!this.type)
-		this.type = this.url.match (/\.(js|css)$/)[1];
+		this.type = this.url.match (/\.(js|css)(\?|$)/)[1];
 	
 	var stateList = ['scarce', 'ready', 'running', 'idle', 'complete', 'failed'];
 	
