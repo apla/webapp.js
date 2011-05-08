@@ -57,6 +57,8 @@ WebApp.Social.Provider = function (config, loader) {
 		if (!renderConfig.to) {
 			console.error ("you must define container for rendering");
 			return;
+		} else {
+			document.querySelector (renderConfig.to).innerHTML = '';
 		}
 		
 		// one widget for one container
@@ -82,7 +84,7 @@ WebApp.Social.Provider = function (config, loader) {
 
 	this.prepare = function () {
 		for (var res in this.res) {
-			if (this.res[res].mustProduce == this.jsClass) {
+			if (this.res[res] && this.res[res].mustProduce == this.jsClass) {
 				this.res[res].cb      = this._init;
 				this.res[res].cbScope = this;
 			}
@@ -116,8 +118,6 @@ WebApp.Social.Provider.vkontakte = function (config, loader) {
 
 	this.res = {
 		'http://userapi.com/js/api/openapi.js?17' : {
-			require:     null,
-			type:        'js',
 			mustProduce: this.jsClass
 		},
 	};
@@ -168,15 +168,15 @@ WebApp.Social.Provider.twitter = function (config, loader) {
 	}
 	
 	this.res = {
-		'http://platform.twitter.com/widgets.js': null
+		'http://platform.twitter.com/widgets.js': {
+			mustProduce: this.jsClass
+		}
 	};
 	
-//	this.prepare ();
+	this.prepare ();
 	
-	this.render = function (el) {
+	this.render = function (el, config) {
 	
-		console.log('twitter');
-		
 		// Create tweeter button
 		var buttonLink = 'http://twitter.com/share?count=horizontal&lang=en&text=&url=&via=';
 		var button = MakeEl ('a', {
@@ -187,11 +187,10 @@ WebApp.Social.Provider.twitter = function (config, loader) {
 		
 		
 		// Add twitter button to container
-		this.container.appendChild(button);
-		
-		
-		//var tweet_button = new twttr.TweetButton(document.getElementById('twitter-share-button'));
-		//tweet_button.render();
+		el.appendChild(button);
+
+		var tweet_button = new twttr.TweetButton (button);
+		tweet_button.render();
 	};
 
 }
@@ -200,16 +199,30 @@ WebApp.Social.Provider.facebook = function (config, loader) {
 
 	this.jsClass = 'FB';
 	
+	this.config = config;
+	
+	WebApp.Social.Provider.apply (this, arguments);
+
+	this.init = function () {
+		
+		try {
+		// ???
+		} catch (ex) {
+		// ???
+		}
+	}
+	
 	var proto = document.location.protocol;
 	var fbAPI = (proto.match (/^http/) ? proto : 'http:') + '//connect.facebook.net/ru_RU/all.js';
 	
 	this.res = {};
-	this.res[fbAPI] = null;
+	this.res[fbAPI] = {
+		mustProduce: this.jsClass
+	};
 
-	WebApp.Social.Provider.apply (this, arguments);
-
+	this.prepare ();
 	
-	this.render = function (el) {
+	this.render = function (el, config) {
 	
 		var fbWidth = '660';
 		
@@ -222,10 +235,12 @@ WebApp.Social.Provider.facebook = function (config, loader) {
 		// TODO
 		var description = MakeEl ('meta', {'site_name': this.description});
 		
+		var head = document.querySelector ('head');
+		
 		// Add meta tags to head
-		this.head.appendChild(title);
-		this.head.appendChild(sitename);	
-		this.head.appendChild(description);
+		head.appendChild(title);
+		head.appendChild(sitename);	
+		head.appendChild(description);
 		
 		
 		// Create elements 
@@ -247,15 +262,15 @@ WebApp.Social.Provider.facebook = function (config, loader) {
 			'class': 'fb_like_button2'
 		});
 		
-		if(this.colorscheme){
-			button.setAttribute('colorscheme', this.colorscheme);	
+		if (config.colorscheme){
+			button.setAttribute('colorscheme', config.colorscheme);	
 		}
 		
 		
 		// Add button to container
 		wrapper.appendChild(button);
-		this.container.appendChild(root);	
-		this.container.appendChild(wrapper);
+		el.appendChild(root);	
+		el.appendChild(wrapper);
 		
 		
 		// Load button
@@ -355,7 +370,9 @@ WebApp.Social.prototype.odnoklasniki = function(){
 	var count = document.createElement('span');
 	count.innerText = '0';
 
-
+	
+	// TODO: call ODKL.createFrameButton (htmlId)
+	
 	// Build button and add to container
 	button.appendChild(count);
 	wrapper.appendChild(button);
